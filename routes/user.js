@@ -262,4 +262,64 @@ router.post('/inactive', function (req, res) {
     }
 });
 
+// ////////////////////////////////////////////////////////
+//Add User Detail 
+
+/* Add User Detail Service. */
+router.post('/update', function (req, res) {
+    logger.info('inside new User ' + req.body.user_id );
+    if (!req.body.name || !req.body.user_id) {
+        logger.info('Validation error.');
+        res.json({ success: false, msg: 'Please Fill Form Corectly.' });
+    } else {
+
+        let user;
+        user = {
+            user_id: req.body.user_id,
+            name: req.body.name,
+            nic: req.body.nic,
+            dob: req.body.dob,
+            gender: req.body.gender,
+            email: req.body.email,
+            user_name: req.body.user_name,
+            address: req.body.address,
+            contact_number: req.body.contact_number,
+            password: req.body.password,
+            user_type: req.body.user_type,
+        };
+
+
+        const sql = "UPDATE user  SET name = '" + req.body.name + "' , nic = '" + req.body.nic + "', dob = '" + req.body.dob + "', gender = '" + req.body.gender + "', email = '" + req.body.email + "' , user_name = '" + req.body.user_name + "',address = '" + req.body.address + "',user_whatsapp = '" + req.body.user_whatsapp + "',user_facebook = '" + req.body.user_facebook + "',mobile_1 = '" + req.body.mobile_1 + "',mobile_2 = '" + req.body.mobile_2 + "'  WHERE id = " + req.body.user_id;
+        const mysqlConnection = mysqlPool((err, connection) => {
+            if (err) {
+                connection.release();
+                logger.error('mysql connection error. ' + err.message);
+                return res.status(500).send({ success: false });
+            }
+            logger.info(sql);
+            connection.query(sql, user, (err, result) => {
+                connection.release();
+                if (err) {
+                    // connection.release();
+                    logger.error('mysql connection error. ' + err.message);
+                    if (err.code == "ER_DUP_ENTRY") {
+                        return res.json({ success: false, msg: 'User name exist.' });
+                    }
+                    return res.status(500).send({ success: false });
+                }
+                else
+                    //connection.release();
+                    logger.info('User Added Sucsses!');
+                return res.json({ success: true, msg: 'User added' });
+
+            });
+        });
+
+
+
+    }
+});
+
+// ////////////////////////////////////////////////////////
+
 module.exports = router;
