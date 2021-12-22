@@ -194,7 +194,7 @@ router.post('/add', function (req, res) {
                 
                         } else {
                             logger.info('connect Driver Detail all view');
-                            var sql = "select item_email from serv_me.item_details where is_active = 1 GROUP BY item_email";
+                            var sql = "select email from serv_me.user where is_active = 1 GROUP BY email";
                             // var sql = "select * from iot_breathlizer.driver_detail Where LICEN_NO =  '"+ licenseNumber +"'" ;
                             console.log(sql);
                             connection.query(sql, function (err, result) {
@@ -209,7 +209,7 @@ router.post('/add', function (req, res) {
 
                                     var emailAddress = "";
                                     for (let i = 0; i < result.length; i++) {
-                                        emailAddress = emailAddress + "," +result[i].item_email
+                                        emailAddress = emailAddress + "," +result[i].email
                                       }
                                       logger.info( emailAddress);
                                     /////////////////////////////////////////////
@@ -344,7 +344,7 @@ router.post('/get-search', (req, res) => {
             logger.info('connect Driver Detail all view');
             var sql = "select * from serv_me.item_details where is_active = 1 ";
             if (req.body.name) {
-                sql = sql + " and name LIKE '%" + req.body.name + "%' or category_name LIKE '%" + req.body.name + "%' ";
+                sql = sql + " and name LIKE '%" + req.body.name + "%' ";
             }
             if (req.body.city_id && req.body.city_id != 0) {
                 sql = sql + " and city_id = " + req.body.city_id;
@@ -367,6 +367,32 @@ router.post('/get-search', (req, res) => {
             if (req.body.createDate_max) {
                 sql = sql + " and create_date <= '" + req.body.createDate_max + "'";
             }
+
+            if (req.body.name) {
+                sql = sql + " or category_name LIKE '%" + req.body.name + "%' ";
+            }
+            if (req.body.city_id && req.body.city_id != 0) {
+                sql = sql + " and city_id = " + req.body.city_id;
+            }
+            if (req.body.district_id && req.body.district_id != 0) {
+                sql = sql + " and district_id = " + req.body.district_id;
+            }
+            if (req.body.category_id) {
+                sql = sql + " and category_id = " + req.body.category_id;
+            }
+            if (req.body.price_min) {
+                sql = sql + " and price >= " + req.body.price_min;
+            }
+            if (req.body.price_max) {
+                sql = sql + " and price <= " + req.body.price_max;
+            }
+            if (req.body.createDate_min) {
+                sql = sql + " and create_date >= " + req.body.createDate_min;
+            }
+            if (req.body.createDate_max) {
+                sql = sql + " and create_date <= '" + req.body.createDate_max + "'";
+            }
+
             sql = sql + " ORDER BY DATE(create_date) DESC ";
 
             console.log(sql);
@@ -1143,5 +1169,40 @@ router.post('/get-search-offers', (req, res) => {
 });
 
 // ////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////
+//Get Item Detail is Special Discount
+
+/* Get Item Detail is Special Discount Service. */
+router.get('/getAll', (req, res) => {
+    logger.info('Get Item Detail is Special Discount');
+    mysqlConnection = mysqlPool((err, connection) => {
+        if (err) {
+            connection.release();
+            logger.error('mysql connection error. ' + err.message);
+            return res.status(500).send({ success: false });
+
+        } else {
+            logger.info('connect Driver Detail all view');
+            var sql = "select * from serv_me.item_details";
+            // var sql = "select * from iot_breathlizer.driver_detail Where LICEN_NO =  '"+ licenseNumber +"'" ;
+            console.log(sql);
+            connection.query(sql, function (err, result) {
+                connection.release();
+                if (err) {
+                    logger.error('mysql connection error. ' + err.message);
+                    return res.status(500).send({ success: false });
+
+                } else {
+                    logger.info('got Item detail all view results set now !');
+                    return res.json({ success: true, result });
+                }
+
+            });
+        }
+    });
+});
+// ////////////////////////////////////////////////////////
+/ ////////////////////////////////////////////////////////
 
 module.exports = router;
