@@ -131,7 +131,7 @@ router.post('/add', function (req, res) {
 
         let item;
         item = {
-            item_id: req.body.name,
+            item_id: req.body.item_id,
             name: req.body.name,
             type: req.body.type,
             description: req.body.description,
@@ -362,10 +362,10 @@ router.post('/get-search', (req, res) => {
                 sql = sql + " and price <= " + req.body.price_max;
             }
             if (req.body.createDate_min) {
-                sql = sql + " and create_date >= " + req.body.createDate_min;
+                sql = sql + " and DATE(create_date) >= '" + req.body.createDate_min + "'";
             }
             if (req.body.createDate_max) {
-                sql = sql + " and create_date <= '" + req.body.createDate_max + "'";
+                sql = sql + " and DATE(create_date) <= '" + req.body.createDate_max + "'";
             }
 
             if (req.body.name) {
@@ -387,10 +387,10 @@ router.post('/get-search', (req, res) => {
                 sql = sql + " and price <= " + req.body.price_max;
             }
             if (req.body.createDate_min) {
-                sql = sql + " and create_date >= " + req.body.createDate_min;
+                sql = sql + " and DATE(create_date) >= '" + req.body.createDate_min + "'";
             }
             if (req.body.createDate_max) {
-                sql = sql + " and create_date <= '" + req.body.createDate_max + "'";
+                sql = sql + " and DATE(create_date) <= '" + req.body.createDate_max + "'";
             }
 
             sql = sql + " ORDER BY DATE(create_date) DESC ";
@@ -1204,5 +1204,77 @@ router.get('/getAll', (req, res) => {
 });
 // ////////////////////////////////////////////////////////
 / ////////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////////
+//Add Report Item Detail
+
+/* Add Report Item Detail Service. */
+router.post('/imageUploard', function (req, res) {
+    logger.info('inside new report item ' + req.body.item_id);
+
+    if (!req.body.item_id) {
+        logger.info('Validation error.');
+        res.json({ success: false, msg: 'Please Fill Form Corectly.' });
+    } else {
+
+        let item;
+       
+
+        var sql = "";
+        
+        if(req.body.imageType == 1){
+            sql = "UPDATE item SET image_1 = '"+ req.body.image_1 +"' WHERE item_id = " +  req.body.item_id;
+        }
+        if(req.body.imageType == 2){
+            sql = "UPDATE item SET image_2 = '"+ req.body.image_2 +"' WHERE item_id = " +  req.body.item_id;
+        }
+        if(req.body.imageType == 3){
+            sql = "UPDATE item SET image_3 = '"+ req.body.image_3 +"' WHERE item_id = " +  req.body.item_id;
+        }
+        if(req.body.imageType == 4){
+            sql = "UPDATE item SET image_4 = '"+ req.body.image_4 +"' WHERE item_id = " +  req.body.item_id;
+        }
+        if(req.body.imageType == 5){
+            sql = "UPDATE item SET image_5 = '"+ req.body.image_5 +"' WHERE item_id = " +  req.body.item_id;
+        }
+        if(req.body.imageType == 6){
+            sql = "UPDATE item SET image_6 = '"+ req.body.image_6 +"' WHERE item_id = " +  req.body.item_id;
+        }
+        if(req.body.imageType == 7){
+            sql = "UPDATE item SET image_7 = '"+ req.body.image_7 +"' WHERE item_id = " +  req.body.item_id;
+        }
+        if(req.body.imageType == 8){
+            sql = "UPDATE item SET image_8 = '"+ req.body.image_8 +"' WHERE item_id = " +  req.body.item_id;
+        }
+
+        const mysqlConnection = mysqlPool((err, connection) => {
+            if (err) {
+                connection.release();
+                logger.error('mysql connection error. ' + err.message);
+                return res.status(500).send({ success: false });
+            }
+            logger.info(sql);
+            connection.query(sql, item, (err, result) => {
+                connection.release();
+                if (err) {
+                    // connection.release();
+                    logger.error('mysql connection error. ' + err.message);
+                    if (err.code == "ER_DUP_ENTRY") {
+                        return res.json({ success: false, msg: 'City name exist.' });
+                    }
+                    return res.status(500).send({ success: false });
+                }
+                else
+                    //connection.release();
+                    logger.info('City Added Sucsses!');
+                return res.json({ success: true, msg: 'City added' });
+
+            });
+        });
+
+
+
+    }
+});
 
 module.exports = router;
